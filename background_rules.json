@@ -1,0 +1,27 @@
+{
+  "Soldier": {
+    "skills": [
+      "Athletics",
+      "Intimidation"
+    ],
+    "feature": "Military Rank",
+    "toolProficiencies": [
+      "One type of gaming set",
+      "Vehicles (land)"
+    ]
+  },
+  "Acolyte": {
+    "skills": [
+      "Insight",
+      "Religion"
+    ],
+    "feature": "Shelter of the Faithful"
+  },
+  "Sage": {
+    "skills": [
+      "Arcana",
+      "History"
+    ],
+    "feature": "Researcher"
+  }
+}

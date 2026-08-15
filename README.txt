@@ -1,1 +1,0 @@
-Stormkeeper v2 — multiple characters, create/copy/open dashboard, local profiles, existing touch-friendly sheet, JSON export/import, offline PWA shell. Upload the FILES INSIDE this folder to the ROOT of the GitHub Pages repository.

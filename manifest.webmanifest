@@ -1,8 +1,0 @@
-{
-  "name": "Stormkeeper",
-  "short_name": "Stormkeeper",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#120f0d",
-  "theme_color": "#17120f"
-}

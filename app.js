@@ -24,7 +24,7 @@ let draft={}; let wizardPage=0; let detailReturn=1; let openId=null;
 const UNLOCK={Cleric:1,Druid:2,Fighter:3,Ranger:3,Rogue:3,Wizard:2,Sorcerer:1,Warlock:1,Bard:3,Paladin:3,Barbarian:3,Monk:3};
 
 function toast(msg){const t=$('toast');if(!t)return;t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),2200)}
-async function loadJSON(file,fallback){try{const r=await fetch(`data/${file}`);if(!r.ok)throw 0;return await r.json()}catch{return fallback}}
+async function loadJSON(file,fallback){try{const r=await fetch(`${file}`);if(!r.ok)throw 0;return await r.json()}catch{return fallback}}
 async function loadData(){
   const [classes,species,backgrounds,spells,conditions,mechanics,progression,catalog]=await Promise.all([
     loadJSON('classes.json',FALLBACK.classes),loadJSON('species_rules.json',{}),loadJSON('background_rules.json',{}),loadJSON('spells.json',{}),loadJSON('conditions.json',[]),loadJSON('mechanics.json',MECH),loadJSON('progression.json',{}),loadJSON('catalog.json',{})

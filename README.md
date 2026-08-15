@@ -1,12 +1,3 @@
-# Stormkeeper V15
+# Stormkeeper V16 Mobile Patch
 
-A polished, touch-friendly 5e character manager and rules reference.
-
-Highlights:
-- Refined responsive visual design for desktop, phone, and Kindle-sized screens.
-- Character creation keeps subclasses out until the correct class level is reached.
-- Multiclass class levels and subclass unlocks remain intact.
-- Equipment choices are filtered by class and unlocked subclass features.
-- Existing Stormkeeper V13/V14 character data is migrated automatically.
-- Character dashboard cards, sheet header, level badge, actions, and empty state are refreshed.
-- No external UI libraries or network dependencies.
+This is the phone-friendly flat deployment patch. Upload these files to the repository root and replace the existing index.html, app.js, main.css, sw.js, and manifest.webmanifest. Existing root-level JSON rules files are intentionally reused.

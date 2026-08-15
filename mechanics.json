@@ -1,0 +1,166 @@
+{
+  "abilityNames": [
+    "Strength",
+    "Dexterity",
+    "Constitution",
+    "Intelligence",
+    "Wisdom",
+    "Charisma"
+  ],
+  "skills": {
+    "Acrobatics": "Dexterity",
+    "Animal Handling": "Wisdom",
+    "Arcana": "Intelligence",
+    "Athletics": "Strength",
+    "Deception": "Charisma",
+    "History": "Intelligence",
+    "Insight": "Wisdom",
+    "Intimidation": "Charisma",
+    "Investigation": "Intelligence",
+    "Medicine": "Wisdom",
+    "Nature": "Intelligence",
+    "Perception": "Wisdom",
+    "Performance": "Charisma",
+    "Persuasion": "Charisma",
+    "Religion": "Intelligence",
+    "Sleight of Hand": "Dexterity",
+    "Stealth": "Dexterity",
+    "Survival": "Wisdom"
+  },
+  "armor": {
+    "None": {
+      "base": 10,
+      "dex": true,
+      "cap": null
+    },
+    "Leather Armor": {
+      "base": 11,
+      "dex": true,
+      "cap": null
+    },
+    "Studded Leather": {
+      "base": 12,
+      "dex": true,
+      "cap": null
+    },
+    "Hide": {
+      "base": 12,
+      "dex": true,
+      "cap": 2
+    },
+    "Chain Shirt": {
+      "base": 13,
+      "dex": true,
+      "cap": 2
+    },
+    "Scale Mail": {
+      "base": 14,
+      "dex": true,
+      "cap": 2
+    },
+    "Breastplate": {
+      "base": 14,
+      "dex": true,
+      "cap": 2
+    },
+    "Half Plate": {
+      "base": 15,
+      "dex": true,
+      "cap": 2
+    },
+    "Ring Mail": {
+      "base": 14,
+      "dex": false,
+      "cap": 0
+    },
+    "Chain Mail": {
+      "base": 16,
+      "dex": false,
+      "cap": 0
+    },
+    "Splint": {
+      "base": 17,
+      "dex": false,
+      "cap": 0
+    },
+    "Plate": {
+      "base": 18,
+      "dex": false,
+      "cap": 0
+    }
+  },
+  "weapons": {
+    "Club": {
+      "ability": "Strength",
+      "damage": "1d4",
+      "type": "bludgeoning",
+      "finesse": false
+    },
+    "Mace": {
+      "ability": "Strength",
+      "damage": "1d6",
+      "type": "bludgeoning",
+      "finesse": false
+    },
+    "Quarterstaff": {
+      "ability": "Strength",
+      "damage": "1d6",
+      "type": "bludgeoning",
+      "finesse": false
+    },
+    "Dagger": {
+      "ability": "Dexterity",
+      "damage": "1d4",
+      "type": "piercing",
+      "finesse": true
+    },
+    "Spear": {
+      "ability": "Strength",
+      "damage": "1d6",
+      "type": "piercing",
+      "finesse": false
+    },
+    "Light Hammer": {
+      "ability": "Strength",
+      "damage": "1d4",
+      "type": "bludgeoning",
+      "finesse": false
+    },
+    "Warhammer": {
+      "ability": "Strength",
+      "damage": "1d8",
+      "type": "bludgeoning",
+      "finesse": false
+    },
+    "Maul": {
+      "ability": "Strength",
+      "damage": "2d6",
+      "type": "bludgeoning",
+      "finesse": false
+    },
+    "Longsword": {
+      "ability": "Strength",
+      "damage": "1d8",
+      "type": "slashing",
+      "finesse": false
+    },
+    "Greatsword": {
+      "ability": "Strength",
+      "damage": "2d6",
+      "type": "slashing",
+      "finesse": false
+    },
+    "Shortbow": {
+      "ability": "Dexterity",
+      "damage": "1d6",
+      "type": "piercing",
+      "finesse": false
+    },
+    "Longbow": {
+      "ability": "Dexterity",
+      "damage": "1d8",
+      "type": "piercing",
+      "finesse": false
+    }
+  }
+}

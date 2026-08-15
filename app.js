@@ -1,105 +1,347 @@
-const PROFILE_KEY='stormkeeper_profiles';const ACTIVE_KEY='stormkeeper_active';const defaults={name:"",str:"",dex:"",con:"",int:"",wis:"",cha:"",ac:"",initiative:"",speed:"30",maxHp:"",currentHp:"",tempHp:"",deity:"Perun",background:"Soldier",alignment:"Neutral Good",race:"Orc",equipment:"Club, shield, leather armor, druidic focus, holy symbol of Perun, explorer's pack, wolf-head battle pelt, soldier's gear and insignia.",traits:"A weathered veteran who listens more than he speaks. Disciplined and watchful, but gentler with animals and the innocent than his appearance suggests.",ideals:"Strength means knowing when to fight and when to listen. I serve Perun by protecting life, not merely winning battles.",bonds:"I seek redemption through secret acts of service, helping others without seeking praise or recognition.",flaws:"I still carry the weight of my betrayal and sometimes mistake silence for judgment.",backstory:"",notes:""};let profiles=JSON.parse(localStorage.getItem(PROFILE_KEY)||'null');if(!profiles){profiles=[{id:'gruk',...defaults,name:'',class1:'Cleric',level1:1,class2:'Druid',level2:2}];localStorage.setItem(PROFILE_KEY,JSON.stringify(profiles));}let activeId=localStorage.getItem(ACTIVE_KEY);if(!activeId)activeId=profiles[0].id;let profile=profiles.find(x=>x.id===activeId)||profiles[0];let d={...defaults,...profile};function syncProfile(){profiles=profiles.map(x=>x.id===activeId?{...x,...d}:x);localStorage.setItem(PROFILE_KEY,JSON.stringify(profiles));localStorage.setItem(ACTIVE_KEY,activeId)}localStorage.setItem('stormkeeper',JSON.stringify(d));
-function save(){localStorage.setItem('stormkeeper',JSON.stringify(d));syncProfile();calc()}function mod(v){v=Number(v);return Number.isNaN(v)?'—':(Math.floor((v-10)/2)>=0?'+':'')+Math.floor((v-10)/2)}
-const dashboard=document.getElementById('dashboard'),sheetApp=document.getElementById('sheetApp'),creator=document.getElementById('creator');function renderCharacters(){const box=document.getElementById('characters');box.innerHTML=profiles.map(p=>`<article class="char-card"><div><h3>${p.name||'Unnamed Adventurer'}</h3><p>${p.race||'—'} · ${p.class1||'—'} ${p.level1||1}${p.class2?' / '+p.class2+' '+p.level2:''}</p><p>${p.background||''}${p.deity?' · '+p.deity:''}</p></div><div class="char-actions"><button class="primary" onclick="openProfile('${p.id}')">Open</button><button class="secondary" onclick="duplicateProfile('${p.id}')">Copy</button></div></article>`).join('')||'<div class="empty">No characters yet.</div>'}function showDashboard(){dashboard.classList.remove('hidden');dashboard.classList.add('active');sheetApp.classList.add('hidden');creator.classList.add('hidden');renderCharacters()}function openProfile(id){const p=profiles.find(x=>x.id===id);if(!p)return;activeId=id;localStorage.setItem(ACTIVE_KEY,id);d={...defaults,...p};localStorage.setItem('stormkeeper',JSON.stringify(d));location.reload()}function duplicateProfile(id){const p=profiles.find(x=>x.id===id);if(!p)return;const copy={...p,id:'char-'+Date.now(),name:(p.name||'Unnamed')+' Copy'};profiles.push(copy);localStorage.setItem(PROFILE_KEY,JSON.stringify(profiles));renderCharacters()}document.getElementById('newChar').onclick=()=>{creator.classList.remove('hidden');dashboard.classList.add('hidden')};document.getElementById('cancelCreate').onclick=showDashboard;document.getElementById('backDash').onclick=showDashboard;document.getElementById('finishCreate').onclick=()=>{const p={...defaults,id:'char-'+Date.now(),name:document.getElementById('cName').value,race:document.getElementById('cRace').value,background:document.getElementById('cBackground').value,deity:document.getElementById('cDeity').value,class1:document.getElementById('cClass1').value,level1:Number(document.getElementById('cLevel1').value),class2:document.getElementById('cClass2').value,level2:Number(document.getElementById('cLevel2').value)};profiles.push(p);localStorage.setItem(PROFILE_KEY,JSON.stringify(profiles));activeId=p.id;localStorage.setItem(ACTIVE_KEY,activeId);d={...defaults,...p};localStorage.setItem('stormkeeper',JSON.stringify(d));location.reload()};renderCharacters();dashboard.classList.remove('hidden');sheetApp.classList.add('hidden');
-const stats=document.getElementById('stats');['str','dex','con','int','wis','cha'].forEach(k=>{let x=document.createElement('div');x.className='ability';x.innerHTML=`<b>${k.toUpperCase()}</b><input type="number"><span class="mod">—</span>`;x.querySelector('input').value=d[k];x.querySelector('input').oninput=e=>{d[k]=e.target.value;save()};x.querySelector('.mod').dataset.k=k;stats.appendChild(x)});
-const skills=[['Acrobatics','dex'],['Animal Handling','wis'],['Arcana','int'],['Athletics','str'],['Deception','cha'],['History','int'],['Insight','wis'],['Intimidation','cha'],['Investigation','int'],['Medicine','wis'],['Nature','int'],['Perception','wis'],['Performance','cha'],['Persuasion','cha'],['Religion','int'],['Sleight of Hand','dex'],['Stealth','dex'],['Survival','wis']];document.getElementById('skills').innerHTML=skills.map(s=>`<div class="skill">${s[0]}<span data-skill="${s[1]}">—</span></div>`).join('');
-document.querySelectorAll('[data-k]').forEach(e=>{let k=e.dataset.k;if(d[k]!==undefined)e.value=d[k];e.oninput=()=>{d[k]=e.value;save()}});function calc(){document.querySelectorAll('.mod').forEach(e=>e.textContent=mod(d[e.dataset.k]));document.querySelectorAll('[data-skill]').forEach(e=>e.textContent=mod(d[e.dataset.skill]));document.querySelector('#spellstats').innerHTML=`<p>Save DC: ${d.wis===''?'—':8+2+Math.floor((Number(d.wis)-10)/2)} · Spell Attack: ${d.wis===''?'—':(Math.floor((Number(d.wis)-10)/2)+2>=0?'+':'')+(Math.floor((Number(d.wis)-10)/2)+2)}</p>`}calc();
-document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button,section').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active')});document.querySelector('nav button').classList.add('active');function roll(n){document.getElementById('roll').textContent=Math.floor(Math.random()*n)+1}
-document.getElementById('export').onclick=()=>{let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)],{type:'application/json'}));a.download=(d.name||'character')+'.json';a.click()};document.getElementById('import').onchange=e=>{let r=new FileReader();r.onload=()=>{d={...defaults,...JSON.parse(r.result)};save();location.reload()};r.readAsText(e.target.files[0])};document.getElementById('reset').onclick=()=>{if(confirm('Reset entered data?')){d={...defaults};save();location.reload()}};
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 
-const bookSections=[
- {id:"contents",title:"Table of Contents",intro:"Browse the reference like a digital rulebook.",items:[
-  ["character","Character Basics"],["combat","Combat & Adventuring"],["classes","Classes"],["species","Species"],["backgrounds","Backgrounds"],["equipment","Equipment"],["spells","Spellcasting"],["conditions","Conditions"]]},
- {id:"character",title:"Character Basics",intro:"Core concepts used throughout character creation and play.",items:[
-  ["ability","Ability Scores & Modifiers"],["proficiency","Proficiency Bonus"],["skills","Skills"],["saves","Saving Throws"],["inspiration","Inspiration"]]},
- {id:"combat",title:"Combat & Adventuring",intro:"Common rules used during encounters and exploration.",items:[
-  ["turn","The Order of Combat"],["action","Actions in Combat"],["movement","Movement"],["rest","Resting"],["death","Death & Dying"],["concentration","Concentration"]]},
- {id:"classes",title:"Classes",intro:"Class reference entries available in the SRD.",items:[
-  ["cleric","Cleric"],["druid","Druid"]]},
- {id:"species",title:"Species",intro:"Species and ancestry rules available in the reference.",items:[
-  ["orc","Orc"]]},
- {id:"backgrounds",title:"Backgrounds",intro:"Backgrounds provide proficiencies, equipment, and story hooks.",items:[
-  ["soldier","Soldier"]]},
- {id:"equipment",title:"Equipment",intro:"Weapons, armor, and adventuring gear.",items:[
-  ["weapons","Weapons"],["armor","Armor"],["gear","Adventuring Gear"]]},
- {id:"spells",title:"Spellcasting",intro:"Spellcasting rules and a searchable spell index.",items:[
-  ["spellindex","Spell Index"]]},
- {id:"conditions",title:"Conditions",intro:"Conditions that can affect creatures.",items:[
-  ["conditionslist","Condition Index"]]}
-];
+const $ = id => document.getElementById(id);
+const KEY = "stormkeeper.v13";
+const esc = s => String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const fmtMod = n => Number(n) >= 0 ? `+${Number(n)}` : `${Number(n)}`;
 
-const bookPages={
-ability:["Ability Scores & Modifiers","Ability scores measure the physical and mental characteristics of a creature. Each score has a modifier used for relevant rolls and checks."],
-proficiency:["Proficiency Bonus","A character's proficiency bonus represents experience and training. It is added when a rule says a creature is proficient with a roll, save, skill, tool, or other feature."],
-skills:["Skills","Skills represent focused applications of ability checks. The six abilities are Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma."],
-saves:["Saving Throws","A saving throw represents an attempt to resist a spell, trap, poison, disease, or similar threat. The relevant ability determines the save unless a rule says otherwise."],
-inspiration:["Inspiration","Inspiration can be awarded for roleplaying, usually when a character acts in a way encouraged by a background, personality trait, ideal, bond, or flaw."],
-turn:["The Order of Combat","Combat is organized into rounds and turns. Each participant acts in initiative order, taking a turn during each round."],
-action:["Actions in Combat","On a turn, a creature can normally take one action. Common actions include Attack, Cast a Spell, Dash, Disengage, Dodge, Help, Hide, and Ready."],
-movement:["Movement","A creature can move up to its speed on its turn. Movement can be divided before and after actions and can interact with difficult terrain and other rules."],
-rest:["Resting","A short rest is a period of downtime of at least 1 hour. A long rest is an extended period of downtime used to recover hit points and other resources according to the rules."],
-death:["Death & Dying","When a creature is reduced to 0 hit points, the rules for falling unconscious, death saving throws, and stabilization determine what happens next."],
-concentration:["Concentration","Some spells require concentration. Taking damage can force a Constitution saving throw to maintain the spell, and certain conditions or actions can end concentration."],
-cleric:["Cleric","A cleric is a divine spellcaster whose class features include spellcasting and a Divine Domain. The SRD includes the Life Domain as a domain reference."],
-druid:["Druid","A druid is a Wisdom-based spellcaster connected to nature. Class features include spellcasting and Wild Shape, with a druid circle providing additional features."],
-orc:["Orc","An orc is a playable species entry in the SRD 5.1. Its traits provide the mechanical benefits described by the species entry."],
-soldier:["Soldier","Soldier is a background focused on martial experience, with proficiencies and equipment associated with military service."],
-weapons:["Weapons","Weapons are categorized by properties such as simple or martial, melee or ranged, and one-handed or two-handed use. Weapon entries specify damage and properties."],
-armor:["Armor","Armor affects Armor Class and may have requirements or limitations. Armor is divided into light, medium, and heavy categories, with shields handled separately."],
-gear:["Adventuring Gear","Adventuring gear covers common equipment used for travel, exploration, survival, and dungeon adventuring."],
-conditionslist:["Condition Index","Conditions describe common states that impose specific effects. Examples include blinded, grappled, prone, restrained, and unconscious."]
+const D = {
+  species:["Orc","Human","Elf","Dwarf","Halfling","Gnome","Half-Elf","Half-Orc","Tiefling"],
+  background:["Soldier","Acolyte","Criminal","Folk Hero","Sage","Hermit","Noble","Outlander","Sailor","Guild Artisan","Entertainer","Urchin"],
+  classes:{
+    "Cleric":["Life Domain","Light Domain","Tempest Domain","Trickery Domain"],
+    "Druid":["Circle of the Land","Circle of the Moon","Circle of the Shepherd"],
+    "Fighter":["Champion","Battle Master","Eldritch Knight"],
+    "Ranger":["Hunter","Beast Master"],
+    "Rogue":["Thief","Assassin"],
+    "Wizard":["School of Evocation","School of Abjuration"],
+    "Sorcerer":["Draconic Bloodline"],
+    "Warlock":["The Fiend"],
+    "Bard":["College of Lore"],
+    "Paladin":["Oath of Devotion"],
+    "Barbarian":["Path of the Berserker"],
+    "Monk":["Way of the Open Hand"]
+  },
+  alignment:["Lawful Good","Neutral Good","Chaotic Good","Lawful Neutral","True Neutral","Chaotic Neutral","Lawful Evil","Neutral Evil","Chaotic Evil"],
+  deity:["Perun","Pelor","Bahamut","Corellon","Moradin","Selûne","Tyr","Tempus","The Raven Queen","None / Custom"],
+  armor:["None","Leather Armor","Studded Leather","Hide","Chain Shirt","Scale Mail","Breastplate","Half Plate","Ring Mail","Chain Mail","Splint","Plate","Shield"],
+  weapon:["Club","Dagger","Quarterstaff","Spear","Light Crossbow","Mace","Sickle","Scimitar","Shortsword","Javelin","Handaxe","Light Hammer","Battleaxe","Longsword","Warhammer","Maul","Greatsword","Greataxe","Rapier","Shortbow","Longbow"]
 };
 
-function openRules(){document.getElementById("rulesModal").classList.add("open");showBook("contents")}
-function closeRules(){document.getElementById("rulesModal").classList.remove("open")}
-function showBook(id){
- const sec=bookSections.find(x=>x.id===id);
- if(!sec)return;
- let body=`<div class="book-breadcrumb"><button onclick="showBook('contents')">Contents</button> › ${esc(sec.title)}</div><h1>${esc(sec.title)}</h1><p class="book-intro">${esc(sec.intro)}</p>`;
- if(sec.items.length){
-   body+=`<div class="toc-grid">`+sec.items.map(([key,label])=>`<button class="toc-entry" onclick="showBookPage('${key}')"><span>${esc(label)}</span><b>›</b></button>`).join("")+`</div>`;
- }
- document.getElementById("bookContent").innerHTML=body;
+let RULES = {classes:{},species:{},backgrounds:{},spells:{},conditions:[]};
+let MECH = {abilityNames:["Strength","Dexterity","Constitution","Intelligence","Wisdom","Charisma"],skills:{}};
+let PROGRESSION = {};
+let CATALOG = {};
+let state = JSON.parse(localStorage.getItem(KEY) || '{"characters":[],"settings":{"inlineRules":false}}');
+
+async function loadJSON(file, fallback){
+  try { const r=await fetch(`data/${file}`); if(!r.ok) throw new Error(file); return await r.json(); }
+  catch { return fallback; }
 }
-function showBookPage(key){
- if(key==="contents"){showBook("contents");return}
- if(key==="spellindex"){showSpellIndex();return}
- const data=bookPages[key];
- if(!data){showBook("contents");return}
- document.getElementById("bookContent").innerHTML=`<div class="book-breadcrumb"><button onclick="showBook('contents')">Contents</button> › Reference</div><h1>${esc(data[0])}</h1><p class="book-text">${esc(data[1])}</p><button class="book-back" onclick="showBook('contents')">← Back to Contents</button>`;
-}
-function showSpellIndex(){
- const names=Object.keys(rulesDB).sort();
- document.getElementById("bookContent").innerHTML=`<div class="book-breadcrumb"><button onclick="showBook('contents')">Contents</button> › Spellcasting</div><h1>Spell Index</h1><p class="book-intro">Select a spell to open its full reference card.</p><div class="spell-index">${names.map(n=>`<button class="toc-entry" onclick="openRule('spell',${JSON.stringify(n)})"><span>${esc(n)}</span><b>›</b></button>`).join("")}</div>`;
+async function loadData(){
+  const [classes,species,backgrounds,spells,conditions,mechanics,progression,catalog] = await Promise.all([
+    loadJSON("classes.json",{}), loadJSON("species_rules.json",{}),
+    loadJSON("background_rules.json",{}), loadJSON("spells.json",{}),
+    loadJSON("conditions.json",[]), loadJSON("mechanics.json",MECH),
+    loadJSON("progression.json",{}), loadJSON("catalog.json",{})
+  ]);
+  RULES={classes,species,backgrounds,spells,conditions};
+  MECH=mechanics; PROGRESSION=progression; CATALOG=catalog;
 }
 
-const rulesDB={
-"Goodberry":{level:"1st-level transmutation",casting:"1 action",range:"Touch",components:"V, S, M (a sprig of mistletoe)",duration:"Instantaneous",description:"You create up to ten magical berries that are infused with magic for the duration. A creature can use its action to eat one berry. Eating a berry restores 1 hit point, and the berry provides enough nourishment to sustain a creature for one day. The berries lose their potency if they have not been consumed within 24 hours of this spell being cast."},
-"Healing Word":{level:"1st-level evocation",casting:"1 bonus action",range:"60 feet",components:"V",duration:"Instantaneous",description:"A creature of your choice that you can see within range regains hit points."},
-"Entangle":{level:"1st-level conjuration",casting:"1 action",range:"90 feet",components:"V, S",duration:"Concentration, up to 1 minute",description:"Grasping weeds and vines sprout from the ground in a 20-foot square starting from a point within range. For the duration, these plants turn the ground in the area into difficult terrain. A creature in the area when you cast the spell must succeed on a Strength saving throw or be restrained by the entangling plants until the spell ends."},
-"Faerie Fire":{level:"1st-level evocation",casting:"1 action",range:"60 feet",components:"V",duration:"Concentration, up to 1 minute",description:"Each object in a 20-foot cube within range is outlined in light. Any creature in the area when the spell is cast is also outlined in light if it fails a Dexterity saving throw. Attack rolls against affected creatures have advantage if the attacker can see them."},
-"Bless":{level:"1st-level enchantment",casting:"1 action",range:"30 feet",components:"V, S, M (a sprinkling of holy water)",duration:"Concentration, up to 1 minute",description:"You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll a d4 and add the number rolled to the attack roll or saving throw."},
-"Guiding Bolt":{level:"1st-level evocation",casting:"1 action",range:"120 feet",components:"V, S",duration:"1 round",description:"Make a ranged spell attack against the target. On a hit, the target takes radiant damage, and the next attack roll made against this target before the end of your next turn has advantage."},
-"Sanctuary":{level:"1st-level abjuration",casting:"1 bonus action",range:"30 feet",components:"V, S, M (a small silver mirror)",duration:"1 minute",description:"You ward a creature within range against attack. A creature that targets the warded creature with an attack or a harmful spell must first make a Wisdom saving throw. On a failed save, it must choose a new target or lose the attack or spell."},
-"Fog Cloud":{level:"1st-level conjuration",casting:"1 action",range:"120 feet",components:"V, S",duration:"Concentration, up to 1 hour",description:"You create a 20-foot-radius sphere of fog centered on a point within range. The sphere spreads around corners, and its area is heavily obscured."},
-"Thunderwave":{level:"1st-level evocation",casting:"1 action",range:"Self (15-foot cube)",components:"V, S",duration:"Instantaneous",description:"A wave of thunderous force sweeps out from you. Each creature in a 15-foot cube originating from you must make a Constitution saving throw. On a failed save, a creature takes thunder damage and is pushed 10 feet away from you. On a successful save, it takes half as much damage and isn't pushed."},
-"Shillelagh":{level:"Transmutation cantrip",casting:"1 bonus action",range:"Touch",components:"V, S, M",duration:"1 minute",description:"The wood of a club or quarterstaff you are holding is imbued with nature's power. You can use your spellcasting ability instead of Strength for attacks with the weapon, its damage die becomes a d8, and it becomes magical."},
-"Guidance":{level:"Divination cantrip",casting:"1 action",range:"Touch",components:"V, S",duration:"Concentration, up to 1 minute",description:"You touch one willing creature. Once before the spell ends, the target can roll a d4 and add the number rolled to one ability check of its choice."},
-"Thorn Whip":{level:"Transmutation cantrip",casting:"1 action",range:"30 feet",components:"V, S, M",duration:"Instantaneous",description:"Make a melee spell attack against a creature within range. On a hit, the target takes piercing damage, and if it is Large or smaller, you can pull it up to 10 feet closer."},
-"Sacred Flame":{level:"Evocation cantrip",casting:"1 action",range:"60 feet",components:"V, S",duration:"Instantaneous",description:"The target must succeed on a Dexterity saving throw or take radiant damage. The target gains no benefit from cover for this saving throw."},
-"Thaumaturgy":{level:"Transmutation cantrip",casting:"1 action",range:"30 feet",components:"V",duration:"Up to 1 minute",description:"You manifest a minor wonder, such as harmless tremors, a booming voice, flames changing appearance, an opened or closed door, or a change in the appearance of your eyes."},
-"Toll the Dead":{level:"Necromancy cantrip",casting:"1 action",range:"60 feet",components:"V, S",duration:"Instantaneous",description:"The target must succeed on a Wisdom saving throw or take necrotic damage. If the target is missing any of its hit points, the spell deals a larger die of damage."}
+function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+function fill(id, values, blank="Choose…"){
+  const e=$(id); if(!e)return;
+  e.innerHTML=`<option value="">${esc(blank)}</option>`+values.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");
+}
+function show(id){document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));$(id)?.classList.add("active");scrollTo(0,0);}
+
+function classLevel(c, cls){
+  if(!cls)return 0;
+  if(cls===c.class1)return Number(c.class1Level||c.level1||0);
+  if(cls===c.class2)return Number(c.class2Level||c.level2||0);
+  return 0;
+}
+function totalClassLevels(c){return classLevel(c,c.class1)+classLevel(c,c.class2);}
+function normalizeLevels(c){
+  let total=Math.max(1,Math.min(20,Number(c.level||1)));
+  let a=Number(c.class1Level||0), b=Number(c.class2Level||0);
+  if(!c.class2){a=total;b=0;}
+  else{
+    if(a<1)a=1;
+    if(b<1)b=1;
+    if(a+b!==total){b=Math.max(1,total-a); if(a+b!==total){a=Math.max(1,total-b);}}
+  }
+  c.class1Level=a;c.class2Level=b;c.level=a+b;
+  return c;
+}
+
+/* Subclass unlock is determined by the class's actual progression data.
+   Explicit fallbacks cover the core classes in the current catalog. */
+const SUBCLASS_UNLOCKS={Cleric:1,Druid:2,Fighter:3,Ranger:3,Rogue:3,Wizard:2,Sorcerer:1,Warlock:1,Bard:3,Paladin:3,Barbarian:3,Monk:3};
+function subclassOptions(cls){
+  const def=RULES.classes?.[cls];
+  if(def?.subclasses) return Object.keys(def.subclasses);
+  return D.classes[cls]||[];
+}
+function subclassUnlockLevel(cls){
+  const def=RULES.classes?.[cls];
+  if(def?.features){
+    const hits=Object.entries(def.features)
+      .filter(([lvl,fs])=>fs.some(f=>/domain|circle|subclass|archetype|tradition|college|oath|patron|school|path|way/i.test(f)))
+      .map(([lvl])=>Number(lvl));
+    if(hits.length)return Math.min(...hits);
+  }
+  return SUBCLASS_UNLOCKS[cls]||99;
+}
+function saveCharacter(c){
+  const i=state.characters.findIndex(x=>x.id===c.id);
+  if(i>=0)state.characters[i]={...c};
+  save();
+}
+
+function armorAllowed(c,name){
+  if(!name)return false;
+  if(name==="None")return true;
+  const hasCleric=c.class1==="Cleric"||c.class2==="Cleric";
+  const hasDruid=c.class1==="Druid"||c.class2==="Druid";
+  const heavy=["Ring Mail","Chain Mail","Splint","Plate"].includes(name);
+  const medium=["Hide","Chain Shirt","Scale Mail","Breastplate","Half Plate"].includes(name);
+  const shield=name==="Shield";
+  // Druid's nonmetal restriction is respected. Tempest heavy-armor access
+  // is unlocked only after the subclass is actually selected.
+  if(hasDruid && ["Scale Mail","Chain Shirt","Breastplate","Half Plate","Ring Mail","Chain Mail","Splint","Plate"].includes(name)) return false;
+  if(shield) return hasCleric||hasDruid;
+  if(heavy) return !!c.subclass1 && c.subclass1==="Tempest Domain" || !!c.subclass2 && c.subclass2==="Tempest Domain";
+  if(medium) return hasCleric||hasDruid;
+  return ["Leather Armor","Studded Leather"].includes(name);
+}
+function weaponAllowed(c,name){
+  if(!name)return false;
+  const simple=["Club","Dagger","Quarterstaff","Spear","Light Crossbow","Mace","Sickle","Javelin","Light Hammer"];
+  const druid=["Club","Dagger","Dart","Javelin","Mace","Quarterstaff","Scimitar","Sickle","Sling","Spear"];
+  const hasCleric=c.class1==="Cleric"||c.class2==="Cleric";
+  const hasDruid=c.class1==="Druid"||c.class2==="Druid";
+  const martial=["Scimitar","Shortsword","Handaxe","Battleaxe","Longsword","Warhammer","Maul","Greatsword","Greataxe","Rapier","Longbow","Shortbow"];
+  if(hasCleric||hasDruid) {
+    if(simple.includes(name)||druid.includes(name)) return true;
+    const tempest=(c.subclass1==="Tempest Domain"||c.subclass2==="Tempest Domain");
+    return tempest && martial.includes(name);
+  }
+  return true;
+}
+function refreshEquipmentChoices(c, preserve=true){
+  const armor=$("armor"), weapon=$("weapon");
+  if(armor){
+    const a=D.armor.filter(x=>armorAllowed(c,x));
+    const old=c.armor||armor.value;
+    fill("armor",a,"Choose armor…"); if(preserve&&a.includes(old))armor.value=old;
+  }
+  if(weapon){
+    const w=D.weapon.filter(x=>weaponAllowed(c,x));
+    const old=c.weapon||weapon.value;
+    fill("weapon",w,"Choose weapon…"); if(preserve&&w.includes(old))weapon.value=old;
+  }
+}
+
+function refreshCreationLevels(){
+  const total=Number($("level")?.value||1), c2=$("class2")?.value;
+  const a=$("class1Level"), b=$("class2Level"); if(!a||!b)return;
+  if(!c2 || c2==="None"){
+    fill("class1Level",Array.from({length:total},(_,i)=>i+1));
+    a.value=String(total); b.innerHTML='<option value="">No second-class levels</option>'; b.disabled=true;
+  }else{
+    const maxA=Math.max(1,total-1);
+    fill("class1Level",Array.from({length:maxA},(_,i)=>i+1));
+    fill("class2Level",Array.from({length:Math.max(1,total-1)},(_,i)=>i+1));
+    a.value=a.value&&Number(a.value)<=maxA?a.value:"1";
+    const maxB=Math.max(1,total-Number(a.value||1));
+    b.value=b.value&&Number(b.value)<=maxB?b.value:String(maxB);
+  }
+}
+function refreshCreationChoices(){
+  const selected=$("class1")?.value,total=Number($("level")?.value||1),c2=$("class2");
+  fill("class2",["None",...Object.keys(D.classes).filter(c=>c!==selected)],selected?"Choose second class…":"Choose second class…");
+  if(total<2){c2.value="None";c2.disabled=true;}else c2.disabled=false;
+  refreshCreationLevels();
+  refreshEquipmentChoices({class1:selected,class2:c2.value==="None"?"":c2.value,subclass1:"",subclass2:""},false);
+}
+
+function initCreator(){
+  fill("species",D.species);fill("background",D.background);
+  fill("class1",Object.keys(D.classes));fill("class2",["None",...Object.keys(D.classes)]);
+  fill("level",Array.from({length:20},(_,i)=>i+1));fill("alignment",D.alignment);
+  fill("deity",D.deity);fill("stats",["Leave blank — roll at the table","Standard Array","Point Buy"]);
+  $("class1").onchange=refreshCreationChoices;
+  $("class2").onchange=()=>{refreshCreationLevels();refreshEquipmentChoices({class1:$("class1").value,class2:$("class2").value==="None"?"":$("class2").value,subclass1:"",subclass2:""},false);};
+  $("level").onchange=refreshCreationChoices;
+  refreshCreationChoices();
+}
+
+function render(){
+  const l=$("list");
+  l.innerHTML=state.characters.length?state.characters.map(c=>{
+    normalizeLevels(c);
+    return `<article class="character" data-id="${c.id}"><b>${esc(c.name||"Unnamed Character")}</b><div class="muted">${esc(c.species||"—")} • ${esc(c.class1||"—")} ${classLevel(c,c.class1)||1}${c.class2?` / ${esc(c.class2)} ${classLevel(c,c.class2)}`:""} • Level ${c.level||1}</div></article>`;
+  }).join(""):`<div class="card"><h3>No characters yet</h3><p class="muted">Create your first character.</p></div>`;
+  l.querySelectorAll(".character").forEach(x=>x.onclick=()=>openSheet(x.dataset.id));
+  save();
+}
+
+function calculate(c){
+  const lvl=Math.max(1,Number(c.level||1)),pb=2+Math.floor((lvl-1)/4),mods={};
+  for(const n of MECH.abilityNames||[])mods[n]=Math.floor((Number((c.stats||{})[n]??10)-10)/2);
+  const armor=MECH.armor?.[c.armor]||MECH.armor?.["None"]||{base:10,dex:true}, dex=mods.Dexterity||0;
+  const ac=Number(armor.base??armor.baseAC??10)+(armor.dex?Math.min(dex,armor.cap??99):0)+(c.armor==="Shield"?2:0);
+  const weapon=MECH.weapons?.[c.weapon]||MECH.weapons?.Club||{ability:"Strength",damage:"1d4",finesse:false};
+  const wa=weapon.finesse?Math.max(mods.Strength,mods.Dexterity):mods[weapon.ability]||0;
+  const spell=mods.Wisdom+pb;
+  return {pb,mods,ac,initiative:mods.Dexterity||0,spellDC:8+spell,spellAttack:spell,weaponBonus:wa+pb,weaponDamage:`${weapon.damage}${fmtMod(wa)}`};
+}
+function mechanicsPanel(c){
+  const r=calculate(c);
+  const d=document.createElement("div");d.className="mechanics-panel";
+  d.innerHTML=`<div class="character-card"><h3>Combat Statistics</h3><div class="metric-grid">
+  <div><span>Armor Class</span><strong>${r.ac}</strong></div><div><span>Proficiency</span><strong>+${r.pb}</strong></div>
+  <div><span>Initiative</span><strong>${fmtMod(r.initiative)}</strong></div><div><span>Spell Save DC</span><strong>${r.spellDC}</strong></div>
+  <div><span>Spell Attack</span><strong>${fmtMod(r.spellAttack)}</strong></div></div></div>
+  <div class="character-card"><h3>Ability Scores</h3><div class="stat-grid">${(MECH.abilityNames||[]).map(n=>`<div class="stat-tile"><b>${esc(n.slice(0,3).toUpperCase())}</b><strong>${esc((c.stats||{})[n]??"—")}</strong><span>${fmtMod(r.mods[n])}</span></div>`).join("")}</div></div>`;
+  return d;
+}
+function progressionPanel(c){
+  const d=document.createElement("div");d.className="character-card level-panel";
+  const total=Number(c.level||1);
+  const features=[];
+  for(const [cls,lvl] of [[c.class1,classLevel(c,c.class1)],[c.class2,classLevel(c,c.class2)]]){
+    if(!cls)continue;
+    for(let n=1;n<=lvl;n++)for(const f of (PROGRESSION[cls]?.levels?.[String(n)]||[]))features.push(`${cls} ${n}: ${f}`);
+  }
+  d.innerHTML=`<div class="level-head"><div><div class="eyebrow">LEVEL PROGRESSION</div><h3>Level ${total}</h3></div><div class="level-buttons"><button class="btn" id="levelDown"${total<=1?" disabled":""}>− Level</button><button class="primary" id="levelUp"${total>=20?" disabled":""}>Level Up →</button></div></div>
+  <p class="muted">${esc(c.class1||"Class")} ${classLevel(c,c.class1)}${c.class2?` / ${esc(c.class2)} ${classLevel(c,c.class2)}`:""}</p>
+  <h4>Features currently recorded</h4><div class="feature-list">${features.map(f=>`<div>• ${esc(f)}</div>`).join("")||"<div>—</div>"}</div>`;
+  d.querySelector("#levelUp").onclick=()=>levelUp(c,1);
+  d.querySelector("#levelDown").onclick=()=>levelUp(c,-1);
+  return d;
+}
+function subclassPanel(c){
+  const wrap=document.createElement("div");wrap.className="character-card subclass-choice-panel";
+  wrap.innerHTML=`<div class="eyebrow">CLASS SPECIALIZATION</div><h3>Subclass Choices</h3><p class="muted">Subclasses are hidden during creation and appear here only after the character reaches the required level in that specific class.</p>`;
+  for(const [label,cls,key] of [["Primary",c.class1,"subclass1"],["Second",c.class2,"subclass2"]]){
+    if(!cls)continue;
+    const lvl=classLevel(c,cls), unlock=subclassUnlockLevel(cls), opts=subclassOptions(cls), current=c[key]||"";
+    const row=document.createElement("div");row.className="subclass-row";
+    if(lvl<unlock){
+      row.innerHTML=`<div><b>${esc(label)} Class: ${esc(cls)}</b><small>Class level ${lvl}. Unlocks at class level ${unlock}.</small></div><span class="locked-badge">LOCKED</span>`;
+    }else{
+      row.innerHTML=`<label><b>${esc(label)} Class: ${esc(cls)} — Level ${lvl}</b><small>Only subclasses belonging to ${esc(cls)} are shown.</small><select><option value="">Choose subclass…</option>${opts.map(o=>`<option value="${esc(o)}"${o===current?" selected":""}>${esc(o)}</option>`).join("")}</select></label>`;
+      row.querySelector("select").onchange=e=>{
+        c[key]=e.target.value; saveCharacter(c); renderSheet(c);
+      };
+    }
+    wrap.appendChild(row);
+  }
+  return wrap;
+}
+function levelUp(c,delta){
+  normalizeLevels(c);
+  const classes=[c.class1,c.class2].filter(Boolean);
+  if(delta<0){
+    if(c.class2 && c.class2Level>1)c.class2Level--;
+    else if(c.class1Level>1)c.class1Level--;
+    else return;
+  }else{
+    if(Number(c.level)>=20)return;
+    let cls=classes[0];
+    if(classes.length===2){
+      const choice=prompt(`Level up in which class?\n1. ${classes[0]} (class level ${classLevel(c,classes[0])})\n2. ${classes[1]} (class level ${classLevel(c,classes[1])})`,"1");
+      cls=choice==="2"?classes[1]:classes[0];
+    }
+    if(cls===c.class1)c.class1Level++;else c.class2Level++;
+  }
+  normalizeLevels(c);
+  // If a subclass was somehow selected and the class level is reduced below
+  // its unlock level, clear it so an illegal state cannot persist.
+  for(const [cls,key] of [[c.class1,"subclass1"],[c.class2,"subclass2"]]){
+    if(cls && c[key] && classLevel(c,cls)<subclassUnlockLevel(cls))c[key]="";
+  }
+  saveCharacter(c);render();renderSheet(c);
+}
+
+function renderSheet(c){
+  normalizeLevels(c);
+  $("sheetName").textContent=c.name||"Unnamed Character";
+  $("sheetMeta").textContent=[c.species,c.background,`${c.class1||"—"} ${classLevel(c,c.class1)||""}`,c.class2?`${c.class2} ${classLevel(c,c.class2)}`:"",c.subclass1,c.subclass2].filter(Boolean).join(" • ");
+  const body=$("sheetBody"); body.innerHTML="";
+  const overview=document.createElement("div");overview.innerHTML=`<h3>Character Overview</h3>
+    <p><b>Total Level:</b> ${c.level}</p><p><b>Alignment:</b> ${esc(c.alignment||"—")}</p><p><b>Deity:</b> ${esc(c.deity||"—")}</p>
+    <p><b>Armor:</b> ${esc(c.armor||"—")}</p><p><b>Weapon:</b> ${esc(c.weapon||"—")}</p>`;
+  body.appendChild(overview);
+  body.appendChild(progressionPanel(c));
+  body.appendChild(subclassPanel(c));
+  body.appendChild(mechanicsPanel(c));
+
+  const eq=document.createElement("div");eq.className="character-card";
+  eq.innerHTML="<h3>Equipment Choices</h3><div class='grid'><label>Armor<select id='sheetArmor'></select></label><label>Weapon<select id='sheetWeapon'></select></label></div>";
+  body.appendChild(eq);
+  refreshEquipmentChoices(c,false);
+  const sa=eq.querySelector("#sheetArmor"),sw=eq.querySelector("#sheetWeapon");
+  fillElement(sa,D.armor.filter(x=>armorAllowed(c,x)),"Choose armor…",c.armor);
+  fillElement(sw,D.weapon.filter(x=>weaponAllowed(c,x)),"Choose weapon…",c.weapon);
+  sa.onchange=e=>{c.armor=e.target.value;saveCharacter(c);renderSheet(c)};
+  sw.onchange=e=>{c.weapon=e.target.value;saveCharacter(c);renderSheet(c)};
+}
+function fillElement(e,values,blank,current){
+  e.innerHTML=`<option value="">${esc(blank)}</option>`+values.map(x=>`<option value="${esc(x)}"${x===current?" selected":""}>${esc(x)}</option>`).join("");
+}
+
+function openSheet(id){const c=state.characters.find(x=>x.id===id);if(!c)return;normalizeLevels(c);saveCharacter(c);renderSheet(c);show("sheet");}
+
+$("createBtn").onclick=()=>{initCreator();show("creator")};
+$("cancelBtn").onclick=()=>show("home");
+$("backBtn").onclick=()=>show("home");
+$("form").onsubmit=e=>{
+  e.preventDefault();
+  const c={id:Date.now(),name:$("name").value.trim(),species:$("species").value,background:$("background").value,
+    class1:$("class1").value,class2:$("class2").value==="None"?"":$("class2").value,
+    level:Number($("level").value||1),class1Level:Number($("class1Level").value||1),class2Level:Number($("class2Level").value||0),
+    subclass1:"",subclass2:"",alignment:$("alignment").value,deity:$("deity").value,
+    armor:$("armor").value,weapon:$("weapon").value,stats:$("stats").value,age:$("age").value};
+  normalizeLevels(c);
+  // Creation is intentionally subclass-free.
+  state.characters.push(c);save();render();openSheet(c.id);
 };
-function openRule(type,name){
- const r=rulesDB[name];
- const body=document.getElementById("ruleModalBody");
- if(!r){body.innerHTML=`<div class="rule-kicker">${esc(type)}</div><h2>${esc(name)}</h2><p class="hint">No reference entry is loaded for this item yet.</p>`}
- else body.innerHTML=`<div class="rule-kicker">SPELL</div><h2>${esc(name)}</h2><p class="rule-level">${esc(r.level)}</p><div class="rule-stats"><div><b>Casting Time</b><span>${esc(r.casting)}</span></div><div><b>Range</b><span>${esc(r.range)}</span></div><div><b>Components</b><span>${esc(r.components)}</span></div><div><b>Duration</b><span>${esc(r.duration)}</span></div></div><h3>Definition</h3><p class="rule-description">${esc(r.description)}</p>`;
- document.getElementById("ruleModal").classList.add("open");
+$("rulesBtn").onclick=async()=>{await openCatalog();show("rules")};
+$("settingsBtn").onclick=()=>{$("inline").checked=!!state.settings.inlineRules;show("settings")};
+$("settingsBack").onclick=()=>show("home");
+$("inline").onchange=e=>{state.settings.inlineRules=e.target.checked;save();};
+
+async function openCatalog(){
+  const books = CATALOG && Object.keys(CATALOG).length ? CATALOG : {};
+  const rules = document.querySelector("#rules .book");
+  if(!rules)return;
+  rules.innerHTML=`<div class="cover"><small>SRD FOUNDATION</small><h1>STORMKEEPER</h1><p>RULES REFERENCE</p></div>
+  <h2>Table of Contents</h2><div class="toc">
+  ${["Character Creation","Classes","Species","Backgrounds","Equipment","Spellcasting","Adventuring","Combat","Conditions"].map(x=>`<button data-chapter="${esc(x)}">${esc(x)}<b>›</b></button>`).join("")}</div>
+  <div id="rulesContent" class="book-text"></div>`;
+  rules.querySelectorAll("[data-chapter]").forEach(b=>b.onclick=()=>showRuleChapter(b.dataset.chapter));
 }
-function closeRule(){document.getElementById("ruleModal").classList.remove("open")}
-function toggleSettings(){document.getElementById("settingsModal").classList.add("open");document.getElementById("inlineRulesToggle").checked=!!state.settings.inlineRules}
-function saveSettings(){state.settings.inlineRules=document.getElementById("inlineRulesToggle").checked;save();document.getElementById("settingsModal").classList.remove("open")}
+function showRuleChapter(chapter){
+  const box=$("rulesContent"); if(!box)return;
+  if(chapter==="Classes"){
+    const entries=Object.entries(RULES.classes||{}).map(([n,v])=>`<article class="rule-card"><h3>${esc(n)}</h3><p>Hit Die: d${v.hitDie||8} • Primary ability: ${esc(v.primaryAbility||"—")}</p><p>${esc((v.features?.["1"]||[]).join(", "))}</p></article>`).join("");
+    box.innerHTML=`<button class="btn" onclick="openCatalog()">← Contents</button><h2>Classes</h2>${entries}`;
+  }else if(chapter==="Conditions"){
+    box.innerHTML=`<button class="btn" onclick="openCatalog()">← Contents</button><h2>Conditions</h2><div class="rule-list">${(RULES.conditions||[]).map(x=>`<article class="rule-card"><h3>${esc(x)}</h3></article>`).join("")}</div>`;
+  }else if(chapter==="Spellcasting"){
+    const entries=Object.entries(RULES.spells||{}).map(([n,v])=>`<article class="rule-card"><h3>${esc(n)}</h3><p>${esc(v.level||"")}</p><button class="rule-link" onclick='alert("Open spell reference: ${esc(n)}")'>Reference</button></article>`).join("");
+    box.innerHTML=`<button class="btn" onclick="openCatalog()">← Contents</button><h2>Spellcasting</h2>${entries}`;
+  }else{
+    box.innerHTML=`<button class="btn" onclick="openCatalog()">← Contents</button><h2>${esc(chapter)}</h2><p>This chapter is a navigation point for the integrated Stormkeeper rules database.</p>`;
+  }
+}
 
-
+(async function boot(){
+  await loadData();
+  Object.values(state.characters).forEach(c=>normalizeLevels(c));
+  initCreator();
+  render();
+})();

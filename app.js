@@ -17,6 +17,57 @@ const EQUIPMENT_PACKAGES={
   Warlock:[['Pact Initiate','Light weapon • arcane focus • scholar-style pack'],['Occult Traveler','Simple weapon • light armor when proficient • arcane focus • traveler-style pack']],
   Wizard:[['Scholar','Quarterstaff or dagger • spellbook/focus • scholar-style pack'],['Battle Mage','Quarterstaff or dagger • spellbook/focus • explorer-style pack']]
 };
+const CHOICE_DESCRIPTIONS={
+  classes:{
+    Barbarian:{description:'A fierce warrior who draws on physical power and a primal rage to survive the hardest fights.',role:'Front-line martial combatant',subclassDescriptions:{'Path of the Berserker':'A path focused on overwhelming fury and relentless melee pressure.'}},
+    Bard:{description:'A versatile adventurer whose magic and abilities are fueled by performance, confidence, and broad training.',role:'Support, control, and skill specialist'},
+    Cleric:{description:'A divine spellcaster who channels the power of a deity or sacred ideal to protect allies, hinder foes, and perform miracles.',role:'Divine caster and support',subclassDescriptions:{'Tempest Domain':'A storm-themed divine path built around thunder, lightning, martial training, and punishing enemies who challenge your faith.'}},
+    Druid:{description:'A spellcaster deeply connected to the natural world, able to heal, control the battlefield, and eventually take animal forms.',role:'Nature caster and shapeshifter',subclassDescriptions:{'Circle of the Shepherd':'A druidic path centered on protecting beasts and fey and calling powerful nature spirits to aid the party.'}},
+    Fighter:{description:'A disciplined master of weapons and armor who can adapt to nearly any battlefield and specialize in a chosen fighting style.',role:'Versatile martial combatant'},
+    Monk:{description:'A disciplined martial artist who turns training, speed, and inner energy into extraordinary combat abilities.',role:'Mobile martial combatant'},
+    Paladin:{description:'A heavily armored champion whose oath grants martial power, divine magic, protection, and the ability to inspire allies.',role:'Armored divine warrior'},
+    Ranger:{description:'A skilled hunter and wilderness warrior who combines martial ability, exploration expertise, and limited spellcasting.',role:'Wilderness martial and scout'},
+    Rogue:{description:'A precise and adaptable adventurer who relies on agility, stealth, expertise, and opportunistic attacks.',role:'Skirmisher and skill specialist'},
+    Sorcerer:{description:'A spellcaster whose magic comes from an innate or extraordinary source within them, offering potent arcane power and flexibility.',role:'Innate arcane caster'},
+    Warlock:{description:'A spellcaster whose supernatural power comes from a pact with a powerful otherworldly patron.',role:'Pact-based arcane caster'},
+    Wizard:{description:'A scholar of magic who learns spells through study and a spellbook, offering one of the broadest arcane toolkits in the game.',role:'Prepared arcane caster'}
+  },
+  species:{
+    Dwarf:{description:'A sturdy people known for resilience, darkvision, craftsmanship, and an affinity for life beneath the mountains.',traits:'Darkvision, Dwarven Resilience, Dwarven Combat Training, Stonecunning, and dwarven toughness.'},
+    Elf:{description:'A graceful people with keen senses, long lives, and an innate connection to magic and the natural world.',traits:'Darkvision, Keen Senses, Fey Ancestry, Trance, and an elf weapon training or subrace package.'},
+    Halfling:{description:'A small and nimble people celebrated for luck, courage, and an ability to move through the world unnoticed.',traits:'Lucky, Brave, Halfling Nimbleness, and a subrace package.'},
+    Human:{description:'Adaptable and ambitious, humans bring broad potential and can fit almost any adventuring role.',traits:'Flexible ability improvements, extra skills or a feat depending on the rules version used.'},
+    Dragonborn:{description:'A proud draconic people whose heritage grants a breath weapon and resistance tied to their draconic ancestry.',traits:'Draconic ancestry, Breath Weapon, Damage Resistance, and Strength and Charisma improvements in SRD 5.1.'},
+    Gnome:{description:'A small, clever people with a natural affinity for magic, invention, curiosity, and mental resilience.',traits:'Gnome Cunning, Darkvision, and a subrace package.'},
+    'Half-Elf':{description:'A people who combine human adaptability with elven senses, charm, and resistance to enchantment.',traits:'Darkvision, Fey Ancestry, Skill Versatility, and flexible ability improvements.'},
+    'Half-Orc':{description:'A formidable people combining human adaptability with orcish endurance and ferocity.',traits:'Darkvision, Relentless Endurance, Savage Attacks, and Strength and Constitution improvements in SRD 5.1.'},
+    Tiefling:{description:'A charismatic people touched by fiendish ancestry, with resistance to fire and innate magical abilities.',traits:'Darkvision, Hellish Resistance, Infernal Legacy, and Charisma improvement in SRD 5.1.'},
+    Orc:{description:'A powerful, hardy warrior people whose traditions often emphasize endurance, force, and decisive action.',traits:'Stormkeeper includes Orc as an available species; its exact traits are loaded from the current species database when present.'},
+    Aasimar:{description:'A celestial-touched people whose heritage can grant radiant power and supernatural resilience.',traits:'Available only when supplied by the selected rules dataset.'},
+    Goliath:{description:'A giant-kin people built for physical endurance and dramatic feats of strength.',traits:'Available only when supplied by the selected rules dataset.'}
+  },
+  backgrounds:{
+    Soldier:{description:'You trained for war, learning discipline, weapons, teamwork, and the realities of military life.',feature:'Military Rank — your service and reputation can help you gain recognition or assistance from soldiers and veterans.'},
+    Acolyte:{description:'You spent formative years serving at a temple or in the service of a deity or religious tradition.',feature:'Shelter of the Faithful — fellow believers can provide basic aid and support.'},
+    Criminal:{description:'You survived through illicit work and learned how to move through society without attracting unwanted attention.',feature:'Criminal Contact — you maintain a reliable contact within the criminal world.'},
+    'Folk Hero':{description:'You came from humble beginnings and became known for standing up for ordinary people.',feature:'Rustic Hospitality — common folk are inclined to shelter and assist you.'},
+    Sage:{description:'You spent years studying lore, history, magic, or another field of knowledge.',feature:'Researcher — when you do not know something, you know where and how to look for the information.'},
+    Hermit:{description:'You lived apart from society for a significant period, pursuing contemplation, study, or a personal revelation.',feature:'Discovery — your isolation led to an important secret or revelation.'},
+    Noble:{description:'You were raised within a privileged social class and understand status, etiquette, and the responsibilities of rank.',feature:'Position of Privilege — people often expect you to belong among the upper classes and may treat you accordingly.'},
+    Outlander:{description:'You grew up or spent years living beyond settled lands, learning to survive through wilderness knowledge and self-reliance.',feature:'Wanderer — you have strong practical knowledge of wilderness travel and finding food and water.'},
+    Sailor:{description:'You spent your formative years aboard ships, learning the sea, shipboard life, and the habits of sailors.',feature:'Ship’s Passage — you can secure free passage on sailing vessels when circumstances allow.'},
+    'Guild Artisan':{description:'You trained in a craft and belonged to a guild that taught you both your trade and the social world around it.',feature:'Guild Membership — your guild can provide contacts, lodging, and professional assistance.'},
+    Entertainer:{description:'You made your living performing for audiences, developing stagecraft, confidence, and a knack for winning a crowd.',feature:'By Popular Demand — you can often find modest food and lodging by performing.'},
+    Urchin:{description:'You survived on the streets and learned to be quick, observant, resourceful, and difficult to catch.',feature:'City Secrets — you know shortcuts and hidden routes through the cities you know.'}
+  }
+};
+
+function described(type,name){
+  const d=CHOICE_DESCRIPTIONS[type]?.[name]||{};
+  const loaded=type==='class'?classDef(name):type==='species'?RULES.species?.[name]||{}:RULES.backgrounds?.[name]||{};
+  return {...d,...loaded,description:loaded.description||d.description,role:loaded.role||d.role,traits:loaded.traits||d.traits};
+}
+
 const BACKGROUND_GEAR={
   Soldier:'A martial keepsake, insignia or trophy, common clothing, and a modest pouch of coin.',
   Acolyte:'A holy symbol, prayer book or devotional item, vestments, and a modest pouch of coin.',
@@ -65,7 +116,7 @@ function show(id){document.querySelectorAll('.view').forEach(v=>v.classList.remo
 function fillElement(e,values,blank='Choose…',current=''){if(!e)return;e.innerHTML=`<option value="">${esc(blank)}</option>`+values.map(v=>`<option value="${esc(v)}"${v===current?' selected':''}>${esc(v)}</option>`).join('')}
 function fill(id,values,blank='Choose…',current=''){fillElement($(id),values,blank,current)}
 function classDef(cls){return RULES.classes?.[cls]||FALLBACK.classes[cls]||{}}
-function ruleInfo(type,name){if(type==='class')return classDef(name);if(type==='species')return RULES.species?.[name]||{};if(type==='background')return RULES.backgrounds?.[name]||{};return {}}
+function ruleInfo(type,name){return described(type,name)}
 function classLevel(c,cls){if(!cls)return 0;if(cls===c.class1)return Number(c.class1Level||0);if(cls===c.class2)return Number(c.class2Level||0);return 0}
 function normalizeLevels(c){let total=Math.max(1,Math.min(20,Number(c.level||1)));let a=Number(c.class1Level||0),b=Number(c.class2Level||0);if(!c.class2){a=total;b=0}else{a=Math.max(1,a);b=Math.max(1,b);if(a+b!==total)b=Math.max(1,total-a);if(a+b!==total)a=Math.max(1,total-b)}c.class1Level=a;c.class2Level=b;c.level=a+b;return c}
 function subclassUnlockLevel(cls){const d=classDef(cls);if(d.features){const hits=Object.entries(d.features).filter(([lvl,fs])=>fs.some(f=>/domain|circle|subclass|archetype|tradition|college|oath|patron|school|path|way/i.test(f))).map(([lvl])=>+lvl);if(hits.length)return Math.min(...hits)}return UNLOCK[cls]||99}
@@ -89,16 +140,22 @@ const pages=[
 ];
 function updateWizardHead(){const p=pages[wizardPage];$('wizardTitle').textContent=p[1];$('wizardHint').textContent=p[2];$('wizardStepLabel').textContent=`Step ${wizardPage+1} of ${pages.length}`;$('wizardProgress').style.width=`${((wizardPage+1)/pages.length)*100}%`}
 function choiceCards(type,items){return `<div class="choice-grid">${items.map(name=>`<button class="choice-card" data-choice="${esc(name)}"><span class="choice-kicker">${esc(type)}</span><strong>${esc(name)}</strong><span>View details →</span></button>`).join('')}</div>`}
-function detailHtml(type,name){const v=ruleInfo(type,name);let h=`<div class="detail-hero"><div class="detail-icon">${type==='class'?'⚔':type==='species'?'🧬':'📜'}</div><div><div class="eyebrow">${esc(type)}</div><h2>${esc(name)}</h2></div></div>`;
+function detailHtml(type,name){
+  const v=ruleInfo(type,name); let h=`<div class="detail-hero"><div class="detail-icon">${type==='class'?'⚔':type==='species'?'🧬':'📜'}</div><div><div class="eyebrow">${esc(type)}</div><h2>${esc(name)}</h2>${v.role?`<span class="subclass-chip">${esc(v.role)}</span>`:''}</div></div>`;
+  if(v.description) h+=`<section class="detail-section"><h3>Overview</h3><p>${esc(v.description)}</p></section>`;
   if(type==='class'){
     h+=`<div class="detail-grid"><div><b>Hit Die</b><span>d${esc(v.hitDie||8)}</span></div><div><b>Primary Ability</b><span>${esc(v.primaryAbility||'—')}</span></div><div><b>Saving Throws</b><span>${esc((v.savingThrows||[]).join(', ')||'—')}</span></div><div><b>Armor</b><span>${esc((v.armor||[]).join(', ')||'—')}</span></div><div><b>Weapons</b><span>${esc((v.weapons||[]).join(', ')||'—')}</span></div></div>`;
-    h+=`<section class="detail-section"><h3>Class features</h3><div class="feature-list">${Object.entries(v.features||{}).sort((a,b)=>+a[0]-+b[0]).map(([lvl,fs])=>`<div><b>Level ${lvl}</b> — ${esc(fs.join(', '))}</div>`).join('')||'<div>No class features are currently loaded.</div>'}</div></section>`;
-    const subs=Object.keys(v.subclasses||{});if(subs.length)h+=`<section class="detail-section"><h3>Subclass paths</h3><p class="muted">You do <b>not</b> choose a subclass here. You will choose one when you reach the class's unlock level.</p><div class="mini-list">${subs.map(s=>`<span>${esc(s)}</span>`).join('')}</div></section>`;
+    h+=`<section class="detail-section"><h3>What this class does</h3><p>${esc(v.description||'')}</p></section>`;
+    h+=`<section class="detail-section"><h3>Class features</h3><div class="feature-list">${Object.entries(v.features||{}).sort((a,b)=>+a[0]-+b[0]).map(([lvl,fs])=>`<div><b>Level ${lvl}</b> — ${esc(Array.isArray(fs)?fs.join(', '):fs)}</div>`).join('')||'<div>No class features are currently loaded.</div>'}</div></section>`;
+    const subs=Object.keys(v.subclasses||{});if(subs.length)h+=`<section class="detail-section"><h3>Subclass paths</h3><p class="muted">Subclass selection stays locked until the appropriate class level.</p>${subs.map(s=>{const sd=(v.subclassDescriptions||{})[s]||v.subclasses?.[s]?.description||'';return `<div class="review-card"><b>${esc(s)}</b>${sd?`<p>${esc(sd)}</p>`:''}</div>`}).join('')}</section>`;
   } else if(type==='species'){
-    h+=`<section class="detail-section"><h3>Traits</h3><ul>${(v.features||[]).map(x=>`<li>${esc(x)}</li>`).join('')||'<li>No detailed traits are loaded for this option.</li>'}</ul>${v.notes?`<p class="muted">${esc(v.notes)}</p>`:''}</section>`;
+    h+=`<section class="detail-section"><h3>Traits</h3>${v.traits?`<p>${esc(v.traits)}</p>`:''}<ul>${(v.features||[]).map(x=>`<li>${esc(x)}</li>`).join('')||(!v.traits?'<li>No detailed traits are currently loaded for this option.</li>':'')}</ul>${v.notes?`<p class="muted">${esc(v.notes)}</p>`:''}</section>`;
   } else {
-    h+=`<section class="detail-section"><h3>Background benefits</h3>${v.skills?.length?`<p><b>Skills:</b> ${esc(v.skills.join(', '))}</p>`:''}${v.toolProficiencies?.length?`<p><b>Tools:</b> ${esc(v.toolProficiencies.join(', '))}</p>`:''}${v.feature?`<p><b>Feature:</b> ${esc(v.feature)}</p>`:''}</section>`;
-  }return h}
+    h+=`<section class="detail-section"><h3>Background benefits</h3>${v.skills?.length?`<p><b>Skills:</b> ${esc(v.skills.join(', '))}</p>`:''}${v.toolProficiencies?.length?`<p><b>Tools:</b> ${esc(v.toolProficiencies.join(', '))}</p>`:''}${v.feature?`<p><b>Feature:</b> ${esc(v.feature)}</p>`:''}${v.description?`<p><b>In play:</b> ${esc(v.description)}</p>`:''}</section>`;
+    if(BACKGROUND_GEAR[name])h+=`<section class="detail-section"><h3>Typical starting gear</h3><p>${esc(BACKGROUND_GEAR[name])}</p></section>`;
+  }
+  return h;
+}
 function showDetail(type,name,backPage,onChoose){detailReturn=backPage;const root=$('wizard');root.innerHTML=`<div class="detail-page"><button class="back-btn" id="detailBack">← Back to choices</button>${detailHtml(type,name)}<div class="detail-actions"><button class="btn" id="detailBack2">Not yet</button><button class="primary" id="detailChoose">Choose ${esc(name)} →</button></div></div>`;$('detailBack').onclick=wizardRender;$('detailBack2').onclick=wizardRender;$('detailChoose').onclick=()=>{onChoose();wizardPage=backPage+1;if(backPage===3)wizardPage=4;wizardRender()}}
 function wizardRender(){updateWizardHead();const root=$('wizard');let body='';
   if(wizardPage===0)body=`<div class="wizard-intro"><div class="big-rune">⚡</div><div><div class="eyebrow">STEP 1 • IDENTITY</div><h2>Who are you forging?</h2><p>Name and age are kept flexible.</p><input id="wizName" class="hero-input" value="${esc(draft.name||'')}" placeholder="Character name (optional)"><label class="small-field">Age<input id="wizAge" type="number" min="0" value="${esc(draft.age||'')}" placeholder="Optional"></label><button class="primary wizard-next" id="nameNext">Continue →</button></div></div>`;
